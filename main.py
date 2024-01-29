@@ -60,3 +60,13 @@ async def get_countries(country_name: Optional[str] = None):
             return {"detail": "Country not found"}
     else:
         return {"detail": "No Query Param"}
+
+
+@app.get("/states")
+async def get_states(skip: int = 0, limit: int = 5):
+    states = [
+        "AP", "TS", "MH", "AS", "KA", "TN", "J&K", "OS"
+    ]
+    return {
+        "states": states[skip:limit + 1]
+    }
