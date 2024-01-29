@@ -1,7 +1,8 @@
 from enum import Enum
-from typing import Optional
+from typing import Optional, Union
 
 from fastapi import FastAPI
+from pydantic import BaseModel
 
 app = FastAPI()
 
@@ -69,4 +70,27 @@ async def get_states(skip: int = 0, limit: int = 5):
     ]
     return {
         "states": states[skip:limit + 1]
+    }
+
+
+# request & Response payload
+class Product(BaseModel):
+    name: str
+    price: float
+    description: Optional[str] = None
+    tax: float = 0
+
+
+# temporary list acting as a db
+product_db = []
+
+
+@app.post("/products")
+async def create_product(product: Product):
+    product.tax = product.price + ((5 / 100) * product.price)
+    product = product.model_dump()
+    product_db.append(product)
+    return {
+        'detail': product,
+        'data': product_db
     }
