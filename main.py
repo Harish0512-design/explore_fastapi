@@ -28,7 +28,6 @@ class ModelBase(str, Enum):
 
 @app.get("/courses/{course_id}")
 async def get_course(course_id: str):
-
     if course_id == ModelBase.nlp:
         return {"course": "You bought Natural Language Processing Course"}
 
@@ -40,3 +39,8 @@ async def get_course(course_id: str):
 
     else:
         return {"course": "Invalid Course Id"}
+
+
+@app.get("/files/{filepath:path}")
+async def get_filepath(filepath: str):
+    return {"filepath": filepath}
