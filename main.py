@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Optional, Union
 
 from fastapi import FastAPI
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 app = FastAPI()
 
@@ -76,9 +76,10 @@ async def get_states(skip: int = 0, limit: int = 5):
 # request & Response payload
 class Product(BaseModel):
     name: str
-    price: float
+    price: float = Field(ge=100, description="Price should be greater than 100")
     description: Optional[str] = None
-    tax: float = 0
+    tax: float = Field(default=0, ge=0, le=5000,
+                       description="Tax should be greater than equal to 0 and less than equal to 5000")
 
 
 # temporary list acting as a db
