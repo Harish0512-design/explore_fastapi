@@ -1,8 +1,8 @@
 from enum import Enum
-from typing import Optional, Union
+from typing import Optional, Union, Set, List
 
 from fastapi import FastAPI
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, HttpUrl
 
 app = FastAPI()
 
@@ -95,3 +95,29 @@ async def create_product(product: Product):
         'detail': product,
         'data': product_db
     }
+
+
+class Image(BaseModel):
+    url: HttpUrl
+    name: str
+
+
+class Item(BaseModel):
+    name: str
+    description: Union[str, None] = None
+    price: float
+    tax: Union[float, None] = None
+    tags: Set[str] = set()
+    images: Union[List[Image], None] = None
+
+
+class Offer(BaseModel):
+    name: str
+    description: Union[str, None] = None
+    price: float
+    items: List[Item]
+
+
+@app.post("/offers/")
+async def create_offer(offer: Offer):
+    return offer
