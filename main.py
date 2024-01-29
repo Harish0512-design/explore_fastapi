@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Optional
 
 from fastapi import FastAPI
 
@@ -44,3 +45,18 @@ async def get_course(course_id: str):
 @app.get("/files/{filepath:path}")
 async def get_filepath(filepath: str):
     return {"filepath": filepath}
+
+
+# optional query param
+@app.get("/countries")
+async def get_countries(country_name: Optional[str] = None):
+    countries = [
+        "India", "USA", "UK", "Australia"
+    ]
+    if country_name:
+        if country_name in countries:
+            return {"detail": "Country found"}
+        else:
+            return {"detail": "Country not found"}
+    else:
+        return {"detail": "No Query Param"}
