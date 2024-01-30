@@ -1,8 +1,10 @@
 import datetime
+import os.path
+import shutil
 from enum import Enum
 from typing import Optional, Union, Set, List
 
-from fastapi import FastAPI, HTTPException, Depends, Request, File, UploadFile, Form
+from fastapi import FastAPI, HTTPException, Depends, Request, File, UploadFile, Form, Body
 from pydantic import BaseModel, Field, HttpUrl, EmailStr, field_validator, model_validator
 from starlette import status
 
@@ -227,3 +229,24 @@ async def user_creation(user: UserRegistrationPayload, response_class=JSONRespon
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(ex))
     except Exception as ex:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ex))
+
+
+MEDIA = "./media"
+
+
+@app.post("/image_upload")
+async def upload_image(image: UploadFile):
+    try:
+        if image.filename.split('.')[-1] in ('jpeg', 'jpg', 'png', 'gif'):
+            # Save the uploaded image to the media folder
+            destination_path = os.path.join(MEDIA, image.filename)
+            with open(destination_path, "wb") as dest_file:
+                shutil.copyfileobj(image.file, dest_file)
+
+            return {"message": "Image uploaded successfully", "filename": image.filename}
+        else:
+            return {
+                "message": "Not found"
+            }
+    except Exception as e:
+        return {"error": str(e)}
