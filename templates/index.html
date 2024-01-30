@@ -8,8 +8,13 @@
 
 <h1> Home Page </h1>
 <h3>
-    <h4>username = {{user.name}}</h4>
-    <h4>age = {{user.age}}</h4>
+    <p>username = {{user.name}}</p>
+    <p>age = {{user.age}}</p>
 </h3>
+<form method="post" action="/submit_form" enctype="multipart/form-data">
+    <input type="text" name="assignment" />
+    <input type="file" name="assignment_file"/>
+    <input type="submit">
+</form>
 </body>
 </html>

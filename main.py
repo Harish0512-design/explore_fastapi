@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional, Union, Set, List
 
-from fastapi import FastAPI, HTTPException, Depends, Request
+from fastapi import FastAPI, HTTPException, Depends, Request, File, UploadFile, Form
 from pydantic import BaseModel, Field, HttpUrl, EmailStr, field_validator
 from starlette import status
 
@@ -173,3 +173,14 @@ async def get_index_page(request: Request, response_class=HTMLResponse):
         "age": 25
     }
     return templates.TemplateResponse("index.html", {"request": request, "user": user})
+
+
+@app.post("/submit_form")
+async def form_handling(assignment: str = Form(...), assignment_file: UploadFile = File(...)):
+    print(assignment)
+    # print(assignment_file.filename)
+    # print(assignment_file.read())
+    # print(assignment_file.size)
+    assignment_file = await assignment_file.read()
+    # print(assignment_file)
+
