@@ -2,9 +2,9 @@ import datetime
 import os.path
 import shutil
 from enum import Enum
-from typing import Optional, Union, Set, List
+from typing import Optional, Union, Set, List, Annotated
 
-from fastapi import FastAPI, HTTPException, Depends, Request, File, UploadFile, Form, Body
+from fastapi import FastAPI, HTTPException, Depends, Request, File, UploadFile, Form, Body, Query
 from pydantic import BaseModel, Field, HttpUrl, EmailStr, field_validator, model_validator
 from starlette import status
 
@@ -250,3 +250,30 @@ async def upload_image(image: UploadFile):
             }
     except Exception as e:
         return {"error": str(e)}
+
+
+# Annotated: used to add metadata to the parameter
+@app.get("/search")
+async def search_countries(
+        q: Annotated[Optional[str], Query(max_length=2)] = None):
+    countries = {
+        "IN": "India",
+        "PK": "Pakisthan",
+        "US": "United States",
+        "UK": "United Kingdom"
+    }
+
+    if q:
+        country = countries.get(q)
+        if country:
+            return {"detail": "Country Found " + country}
+        else:
+            raise HTTPException(
+                detail="Country Not Found",
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+    else:
+        raise HTTPException(
+            detail="No query param Provided.",
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
