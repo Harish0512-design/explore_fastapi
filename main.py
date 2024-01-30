@@ -1,12 +1,16 @@
-import re
 from enum import Enum
 from typing import Optional, Union, Set, List
 
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, Request
 from pydantic import BaseModel, Field, HttpUrl, EmailStr, field_validator
 from starlette import status
 
+from fastapi.templating import Jinja2Templates
+from starlette.responses import HTMLResponse
+
 app = FastAPI()
+
+templates = Jinja2Templates(directory="templates")
 
 
 @app.get("/")
@@ -160,3 +164,12 @@ def get_blog_or_404(id: str):
 @app.get("/blog/{id}")
 async def get_blog(blog_name: str = Depends(get_blog_or_404)):
     return {"blog": blog_name}
+
+
+@app.get("/home")
+async def get_index_page(request: Request, response_class=HTMLResponse):
+    user = {
+        "name": "Harish",
+        "age": 25
+    }
+    return templates.TemplateResponse("index.html", {"request": request, "user": user})
