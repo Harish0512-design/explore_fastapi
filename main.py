@@ -1,12 +1,13 @@
+import datetime
 from enum import Enum
 from typing import Optional, Union, Set, List
 
 from fastapi import FastAPI, HTTPException, Depends, Request, File, UploadFile, Form
-from pydantic import BaseModel, Field, HttpUrl, EmailStr, field_validator
+from pydantic import BaseModel, Field, HttpUrl, EmailStr, field_validator, model_validator
 from starlette import status
 
 from fastapi.templating import Jinja2Templates
-from starlette.responses import HTMLResponse
+from starlette.responses import HTMLResponse, JSONResponse
 
 app = FastAPI()
 
@@ -184,3 +185,45 @@ async def form_handling(assignment: str = Form(...), assignment_file: UploadFile
     assignment_file = await assignment_file.read()
     # print(assignment_file)
 
+
+class GenderChoices(str, Enum):
+    male = "male"
+    female = "female"
+    others = "others"
+
+
+class UserRegistrationPayload(BaseModel):
+    firstname: str = Field(max_length=15)
+    lastname: str = Field(max_length=15)
+    username: str = Field(max_length=10)
+    dob: datetime.date
+    email: EmailStr
+    gender: GenderChoices
+    phone_number: str = Field(max_length=15)
+    password: str
+    confirm_password: str
+
+    @model_validator(mode="after")
+    def password_match(self):
+        if self.password != self.confirm_password:
+            raise ValueError("Password and Confirm Password mismatch")
+        return self
+
+
+users = []
+
+
+@app.post("/register_user", status_code=status.HTTP_201_CREATED)
+async def user_creation(user: UserRegistrationPayload, response_class=JSONResponse):
+    user = user.model_dump()
+    try:
+        if user.get('username') in users:
+            raise ValueError("User Already Exists.")
+        users.append(user)
+        return {
+            "users": users
+        }
+    except ValueError as ex:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(ex))
+    except Exception as ex:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ex))
