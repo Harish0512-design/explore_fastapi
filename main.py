@@ -2,8 +2,9 @@ import re
 from enum import Enum
 from typing import Optional, Union, Set, List
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel, Field, HttpUrl, EmailStr, field_validator
+from starlette import status
 
 app = FastAPI()
 
@@ -141,3 +142,21 @@ class User(BaseModel):
 async def create_user(user: User):
     user = user.model_dump()
     return {'user': user}
+
+
+def get_blog_or_404(id: str):
+    blogs = {
+        "1": "Blog1",
+        "2": "Blog2",
+        "3": "Blog3",
+        "4": "Blog4",
+        "5": "Blog5",
+    }
+    if blogs.get(id):
+        return blogs.get(id)
+    return HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
+
+@app.get("/blog/{id}")
+async def get_blog(blog_name: str = Depends(get_blog_or_404)):
+    return {"blog": blog_name}
