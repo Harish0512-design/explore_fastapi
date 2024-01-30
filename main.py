@@ -1,8 +1,9 @@
+import re
 from enum import Enum
 from typing import Optional, Union, Set, List
 
 from fastapi import FastAPI
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, Field, HttpUrl, EmailStr, field_validator
 
 app = FastAPI()
 
@@ -121,3 +122,22 @@ class Offer(BaseModel):
 @app.post("/offers/")
 async def create_offer(offer: Offer):
     return offer
+
+
+class User(BaseModel):
+    email: EmailStr
+    username: str
+    password: str
+    confirm_password: str
+
+    @field_validator("email")
+    def validate_email(cls, value: str):
+        if 'admin' in value:
+            raise ValueError("Admin is not allowed to Register")
+        return value
+
+
+@app.post("/create_user")
+async def create_user(user: User):
+    user = user.model_dump()
+    return {'user': user}
